@@ -1,0 +1,122 @@
+[
+  {
+    "id": "st_01",
+    "name": "Thư viện & Khu tự học (Nhà I / Thư viện ĐHQGHN)",
+    "zone": "in",
+    "cat": "study",
+    "sub_cat": null,
+    "lat": 20.9963,
+    "lng": 105.8065,
+    "info": "07:30-21:00 · Miễn phí (Thẻ SV) · Khu vực đọc yên tĩnh, cần giữ trật tự",
+    "tags": ["quiet", "outlet", "ac"],
+    "checked": "2026-11-21"
+  },
+  {
+    "id": "st_02",
+    "name": "Giảng đường Nhà B & Không gian tự học hành lang",
+    "zone": "in",
+    "cat": "study",
+    "sub_cat": null,
+    "lat": 20.9968,
+    "lng": 105.8061,
+    "info": "06:30-21:30 · Miễn phí · Tòa nhà B trung tâm khuôn viên USSH",
+    "tags": ["group", "outlet"],
+    "checked": "2026-11-21"
+  },
+  {
+    "id": "ad_01",
+    "name": "Phòng Chính trị & Công tác Học sinh Sinh viên (Nhà E)",
+    "zone": "in",
+    "cat": "admin",
+    "sub_cat": null,
+    "lat": 20.9966,
+    "lng": 105.8071,
+    "info": "08:00-11:30, 13:30-17:00 (T2-T6) · Miễn phí · Tầng 1 nhà E, xác nhận giấy tờ SV",
+    "tags": ["student_aff", "morning_busy"],
+    "checked": "2026-11-21"
+  },
+  {
+    "id": "ad_02",
+    "name": "Phòng Đào tạo & Văn phòng các Khoa (Nhà E / Nhà B)",
+    "zone": "in",
+    "cat": "admin",
+    "sub_cat": null,
+    "lat": 20.9969,
+    "lng": 105.8069,
+    "info": "08:00-11:30, 13:30-17:00 (T2-T6) · Miễn phí · Giải quyết tín chỉ, lịch học, học vụ",
+    "tags": ["academic", "morning_busy"],
+    "checked": "2026-11-21"
+  },
+  {
+    "id": "fd_01",
+    "name": "Khu Cơm bình dân Ngõ 334 Nguyễn Trãi",
+    "zone": "out",
+    "cat": "food",
+    "sub_cat": null,
+    "lat": 20.9958,
+    "lng": 105.8074,
+    "info": "10:00-20:30 · 25k-40k · Ngõ 334 cạnh cổng trường, nhiều lựa chọn cơm suất",
+    "tags": ["cheap", "fast", "lunch_crowded"],
+    "checked": "2026-11-21"
+  },
+  {
+    "id": "fd_02",
+    "name": "Tổ hợp Ăn vặt & Bún Phở Ngõ 330 Nguyễn Trãi",
+    "zone": "out",
+    "cat": "food",
+    "sub_cat": null,
+    "lat": 20.9955,
+    "lng": 105.8068,
+    "info": "06:30-22:30 · 20k-45k · Ngõ 330 đi bộ 2 phút từ cổng chính, tiện ăn nhanh giữa ca",
+    "tags": ["cheap", "fast", "late"],
+    "checked": "2026-11-21"
+  },
+  {
+    "id": "fd_03",
+    "name": "Căng-tin & Khu dịch vụ sinh viên nội khu",
+    "zone": "in",
+    "cat": "food",
+    "sub_cat": "study",
+    "lat": 20.9961,
+    "lng": 105.8060,
+    "info": "06:30-19:30 · 15k-35k · Trong khuôn viên trường, tiện ăn sáng và nghỉ trưa",
+    "tags": ["cheap", "fast", "lunch_crowded"],
+    "checked": "2026-11-21"
+  },
+  {
+    "id": "pl_01",
+    "name": "Sân bóng & Khu sinh hoạt cộng đồng Ký túc xá Mễ Trì / Lân cận",
+    "zone": "out",
+    "cat": "play",
+    "sub_cat": null,
+    "lat": 20.9949,
+    "lng": 105.8055,
+    "info": "16:00-22:00 · Miễn phí / Chia sân · Phù hợp đi dạo mát, thể thao và tụ tập buổi tối",
+    "tags": ["low_cost", "group_play", "evening"],
+    "checked": "2026-11-21"
+  },
+  {
+    "id": "dl_01",
+    "name": "Cà phê Học bài & Chạy Deadline 24/7 Khu Nguyễn Trãi",
+    "zone": "out",
+    "cat": "dl",
+    "sub_cat": "food",
+    "lat": 20.9953,
+    "lng": 105.8082,
+    "info": "Mở 24/7 · 30k-55k · Mặt đường Nguyễn Trãi, nhiều bàn dài có ổ cắm và trông xe đêm",
+    "tags": ["all_night", "lots_outlet", "quiet_night", "safe_park"],
+    "checked": "2026-11-21"
+  },
+  {
+    "id": "dl_02",
+    "name": "Tiệm Cà phê Yên tĩnh Khu Thanh Xuân Trung",
+    "zone": "out",
+    "cat": "dl",
+    "sub_cat": "study",
+    "lat": 20.9975,
+    "lng": 105.8086,
+    "info": "07:30-23:30 · 30k-50k · Ngõ yên tĩnh phía Thanh Xuân Trung, có điều hòa và Wi-Fi khỏe",
+    "tags": ["lots_outlet", "quiet_night", "safe_park"],
+    "checked": "2026-11-21"
+  }
+]
