@@ -106,12 +106,17 @@ const state = {
   viewMode: "map",
   selectedPlace: null,
   expanded: false,
-  userLocation: { lat: DEFAULT_CENTER[0], lng: DEFAULT_CENTER[1], isGps: false }
+  userLocation: { lat: DEFAULT_CENTER[0], lng: DEFAULT_CENTER[1], isGps: false, accuracy: null },
+  gpsTracking: false,
+  followGps: false,
+  pickCoordMode: false
 };
 
 let map;
 let markersLayer;
 let userMarker;
+let userAccuracyCircle;
+let gpsWatchId = null;
 
 // --- 1. Lọc & Chấm điểm Tag ---
 
@@ -341,7 +346,6 @@ function renderTagChips() {
   const container = document.getElementById("tagChips");
   container.innerHTML = "";
 
-  // Chip trạng thái Đang mở cửa đứng đầu hàng Cấp 2
   const openBtn = document.createElement("button");
   openBtn.type = "button";
   openBtn.className = `chip open-filter-chip ${state.openOnly ? "active" : ""}`;
@@ -550,7 +554,7 @@ function renderListView(matchedPlaces) {
 
   const sorted = sortPlacesByDistance(matchedPlaces, state.userLocation);
   const originNote = state.userLocation.isGps
-    ? "tính từ vị trí GPS của bạn"
+    ? "tính từ vị trí GPS trực tiếp của bạn"
     : "tính từ cổng USSH (336 Nguyễn Trãi)";
 
   summaryEl.textContent = `${sorted.length} địa điểm • Gần nhất trước (${originNote})`;
@@ -657,38 +661,129 @@ async function loadPlaces() {
   }
 }
 
-function locateUser() {
+// --- 4. GPS Theo dõi vị trí thời gian thực & Chấm tọa độ nhanh ---
+
+function updateLocateButtonUi() {
+  const btn = document.getElementById("locateBtn");
+  if (!btn) return;
+  if (state.gpsTracking) {
+    btn.textContent = state.followGps ? "GPS: Đang bám theo" : "Về vị trí GPS";
+    btn.classList.add("active");
+  } else {
+    btn.textContent = "Vị trí của tôi";
+    btn.classList.remove("active");
+  }
+}
+
+function renderUserLocationMarker(lat, lng, accuracy = 25) {
+  const safeRadius = Math.min(Math.max(accuracy || 20, 10), 250);
+
+  if (userAccuracyCircle) {
+    userAccuracyCircle.setLatLng([lat, lng]).setRadius(safeRadius);
+  } else {
+    userAccuracyCircle = L.circle([lat, lng], {
+      radius: safeRadius,
+      color: "#2563eb",
+      weight: 1,
+      fillColor: "#2563eb",
+      fillOpacity: 0.14
+    }).addTo(map);
+  }
+
+  if (userMarker) {
+    userMarker.setLatLng([lat, lng]);
+  } else {
+    userMarker = L.circleMarker([lat, lng], {
+      radius: 8,
+      color: "#ffffff",
+      weight: 2.5,
+      fillColor: "#2563eb",
+      fillOpacity: 1
+    })
+      .bindTooltip("Vị trí trực tiếp của bạn")
+      .addTo(map);
+  }
+}
+
+function stopRealtimeGps() {
+  if (gpsWatchId !== null && "geolocation" in navigator) {
+    navigator.geolocation.clearWatch(gpsWatchId);
+  }
+  gpsWatchId = null;
+  state.gpsTracking = false;
+  state.followGps = false;
+  updateLocateButtonUi();
+}
+
+function startOrCenterRealtimeGps() {
   if (!("geolocation" in navigator)) {
+    alert("Thiết bị hoặc trình duyệt của bạn không hỗ trợ GPS.");
     map.setView(DEFAULT_CENTER, 16);
     return;
   }
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      const { latitude, longitude } = pos.coords;
-      state.userLocation = { lat: latitude, lng: longitude, isGps: true };
-      map.setView([latitude, longitude], 16);
 
-      if (userMarker) {
-        userMarker.setLatLng([latitude, longitude]);
-      } else {
-        userMarker = L.circleMarker([latitude, longitude], {
-          radius: 7,
-          color: "#ffffff",
-          weight: 2,
-          fillColor: "#2563eb",
-          fillOpacity: 1
-        })
-          .bindTooltip("Vị trí của bạn")
-          .addTo(map);
+  // Nếu GPS đã bật sẵn -> bật lại chế độ bám theo và căn giữa ngay vào vị trí hiện tại
+  if (state.gpsTracking && gpsWatchId !== null) {
+    state.followGps = true;
+    updateLocateButtonUi();
+    if (state.userLocation.isGps) {
+      map.setView([state.userLocation.lat, state.userLocation.lng], Math.max(map.getZoom(), 17), {
+        animate: true
+      });
+    }
+    return;
+  }
+
+  state.gpsTracking = true;
+  state.followGps = true;
+  updateLocateButtonUi();
+
+  gpsWatchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      const { latitude, longitude, accuracy } = pos.coords;
+      state.userLocation = {
+        lat: latitude,
+        lng: longitude,
+        isGps: true,
+        accuracy: Math.round(accuracy || 20)
+      };
+
+      renderUserLocationMarker(latitude, longitude, accuracy);
+
+      if (state.followGps) {
+        map.setView([latitude, longitude], Math.max(map.getZoom(), 17), { animate: true });
       }
+
       updateMapAndUi();
     },
-    () => {
-      map.setView(DEFAULT_CENTER, 16);
+    (err) => {
+      stopRealtimeGps();
+      if (err.code === 1) {
+        alert("Bạn chưa cấp quyền vị trí. Hãy cho phép truy cập Location trong trình duyệt để bật GPS.");
+      } else {
+        alert("Không dò được tín hiệu GPS lúc này. Bản đồ đang giữ tâm tại 336 Nguyễn Trãi.");
+        map.setView(DEFAULT_CENTER, 16);
+      }
     },
-    { enableHighAccuracy: true, timeout: 4000 }
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 1000
+    }
   );
 }
+
+// Công cụ hỗ trợ bạn chấm tọa độ trực tiếp trên bản đồ khi chỉnh sửa places.json:
+// Mở Console trình duyệt (F12) và gõ: togglePickCoord()
+window.togglePickCoord = function () {
+  state.pickCoordMode = !state.pickCoordMode;
+  console.log(
+    state.pickCoordMode
+      ? "ĐÃ BẬT chế độ chấm tọa độ: Hãy click lên bản đồ để lấy lat, lng."
+      : "ĐÃ TẮT chế độ chấm tọa độ."
+  );
+  return state.pickCoordMode;
+};
 
 async function init() {
   map = L.map("map", { zoomControl: false }).setView(DEFAULT_CENTER, 16);
@@ -698,6 +793,27 @@ async function init() {
   }).addTo(map);
 
   markersLayer = L.layerGroup().addTo(map);
+
+  // Khi người dùng chủ động kéo bản đồ đi nơi khác, tạm ngưng tự kéo camera theo GPS
+  map.on("dragstart", () => {
+    if (state.gpsTracking && state.followGps) {
+      state.followGps = false;
+      updateLocateButtonUi();
+    }
+  });
+
+  // Hỗ trợ click lấy tọa độ khi bật window.togglePickCoord()
+  map.on("click", (e) => {
+    if (!state.pickCoordMode) return;
+    const lat = Number(e.latlng.lat.toFixed(5));
+    const lng = Number(e.latlng.lng.toFixed(5));
+    const text = `"lat": ${lat},\n    "lng": ${lng}`;
+    navigator.clipboard?.writeText(text).catch(() => {});
+    L.popup()
+      .setLatLng(e.latlng)
+      .setContent(`Tọa độ đã copy:<br><code>"lat": ${lat}, "lng": ${lng}</code>`)
+      .openOn(map);
+  });
 
   document.getElementById("searchInput").addEventListener("input", (e) => {
     state.keyword = e.target.value;
@@ -736,7 +852,13 @@ async function init() {
     if (state.selectedPlace) renderPlaceSheet(state.selectedPlace);
   });
 
-  document.getElementById("locateBtn").addEventListener("click", locateUser);
+  const locateBtn = document.getElementById("locateBtn");
+  locateBtn.addEventListener("click", startOrCenterRealtimeGps);
+  // Chuột phải hoặc nhấn giữ trên nút GPS để tắt theo dõi liên tục
+  locateBtn.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    if (state.gpsTracking) stopRealtimeGps();
+  });
 
   state.places = await loadPlaces();
   renderCategoryChips();
